@@ -10,49 +10,55 @@
 
 ;(function($) {
 	$.fn.unveil = function(threshold, callback) {
+		var self = this;
 
-	var $w = $(window),
-		th = threshold || 0,
-		retina = window.devicePixelRatio > 1,
-		attrib = retina? "data-src-retina" : "data-src",
-		images = this,
-		loaded;
+		var $w = $(window),
+			th = threshold || 0,
+			retina = window.devicePixelRatio > 1,
+			attrib = retina? "data-src-retina" : "data-src",
+			images = this;
 
-	this.one("unveil", function() {
-		var source = this.getAttribute(attrib);
-		source = source || this.getAttribute("data-src");
-		if (source) {
-			this.setAttribute("src", source);
-			if (typeof callback === "function") {
-				callback.call(this);
+		// was one, but did not trigger for added elements
+		function unveilElem(index, elem) {
+			var source = elem.getAttribute(attrib);
+			source = source || elem.getAttribute("data-src");
+			if (source) {
+				elem.setAttribute("src", source);
+				if (typeof callback === "function") {
+					callback.call(elem);
+				}
 			}
+		};
+
+		function unveil() {
+			var inview = images.filter(function() {
+				var $e = $(this);
+				if ($e.is(":hidden")) {
+					return;
+				}
+
+				var wt = $w.scrollTop(),
+					wb = wt + $w.height(),
+					et = $e.offset().top,
+					eb = et + $e.height();
+
+				return eb >= wt - th && et <= wb + th;
+			});
+
+			inview.each(unveilElem);
+			images = images.not(inview);
 		}
-	});
 
-	function unveil() {
-		var inview = images.filter(function() {
-			var $e = $(this);
-			if ($e.is(":hidden")) {
-				return;
-			}
+		function add(e, image) {
+			images = images.add(image);
+		}
 
-			var wt = $w.scrollTop(),
-				wb = wt + $w.height(),
-				et = $e.offset().top,
-				eb = et + $e.height();
+		// triggered via scroll, resize, etc., not scroll.unveil
+		$w.on("scroll.unveil resize.unveil lookup.unveil", unveil);
+		$w.on("add.unveil", add);
 
-			return eb >= wt - th && et <= wb + th;
-		});
+		unveil();
 
-		loaded = inview.trigger("unveil");
-		images = images.not(loaded);
-	}
-
-	$w.on("scroll.unveil resize.unveil lookup.unveil", unveil);
-
-	unveil();
-
-	return this;
-};
-
+		return self;
+	};
 })(window.jQuery || window.Zepto);
