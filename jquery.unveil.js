@@ -54,7 +54,7 @@
 		}
 
 		// triggered via scroll, resize, etc., not scroll.unveil
-		$w.on("scroll.unveil resize.unveil lookup.unveil", unveil);
+		$w.on("scroll.unveil resize.unveil lookup.unveil touchmove.unveil", unveil);
 		$w.on("add.unveil", add);
 
 		unveil();
