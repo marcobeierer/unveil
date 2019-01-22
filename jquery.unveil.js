@@ -9,13 +9,14 @@
  */
 
 ;(function($) {
-	$.fn.unveil = function(threshold, callback) {
+	$.fn.unveil = function(threshold, throttle, callback) {
 		var self = this;
 
 		var $w = $(window),
 			th = threshold || 0,
 			retina = window.devicePixelRatio > 1,
 			attrib = retina? "data-src-retina" : "data-src",
+			timer,
 			images = this;
 
 		// was one, but did not trigger for added elements
@@ -30,7 +31,7 @@
 			}
 		};
 
-		function unveil() {
+		function render() {
 			var inview = images.filter(function() {
 				var $e = $(this);
 				if ($e.is(":hidden")) {
@@ -49,12 +50,29 @@
 			images = images.not(inview);
 		}
 
+		function unveil() {
+			render();
+		}
+
+		function unveilThrottled() {
+			if (timer) {
+				return;
+			}
+
+			render();
+
+			timer = setTimeout(function () {
+				timer = undefined;
+			}, throttle);
+		}
+
 		function add(e, image) {
 			images = images.add(image);
 		}
 
 		// triggered via scroll, resize, etc., not scroll.unveil
-		$w.on("scroll.unveil resize.unveil lookup.unveil touchmove.unveil", unveil);
+		$w.on("scroll.unveil resize.unveil touchmove.unveil", unveilThrottled);
+		$w.on("lookup.unveil", unveil);
 		$w.on("add.unveil", add);
 
 		unveil();
