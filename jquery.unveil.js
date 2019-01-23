@@ -92,6 +92,15 @@
 		$w.on("lookup.unveil", unveil);
 		$w.on("add.unveil", add);
 
+		self.off = function() {
+			window.removeEventListener('scroll', unveilThrottled);
+			window.removeEventListener('touchmove', unveilThrottled);
+			window.removeEventListener('resize', unveilResize);
+			$w.off('lookup.unveil', unveil);
+			$w.off('add.unveil', add);
+			$w.off('unveil');
+		}
+
 		unveil();
 
 		return self;
