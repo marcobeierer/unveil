@@ -17,6 +17,7 @@
 			retina = window.devicePixelRatio > 1,
 			attrib = retina? "data-src-retina" : "data-src",
 			timer,
+			windowHeight = $w.height(),
 			images = this;
 
 		// was one, but did not trigger for added elements
@@ -39,7 +40,7 @@
 				}
 
 				var wt = $w.scrollTop(),
-					wb = wt + $w.height(),
+					wb = wt + windowHeight,
 					et = $e.offset().top,
 					eb = et + $e.height();
 
@@ -66,12 +67,18 @@
 			}, throttle);
 		}
 
+		function unveilResize() {
+			windowHeight = $w.height();
+			unveilThrottled();
+		}
+
 		function add(e, image) {
 			images = images.add(image);
 		}
 
 		// triggered via scroll, resize, etc., not scroll.unveil
 		$w.on("scroll.unveil resize.unveil touchmove.unveil", unveilThrottled);
+		$w.on("resize.unveil", unveilResize);
 		$w.on("lookup.unveil", unveil);
 		$w.on("add.unveil", add);
 
