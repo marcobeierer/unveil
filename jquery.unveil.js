@@ -77,8 +77,18 @@
 		}
 
 		// triggered via scroll, resize, etc., not scroll.unveil
-		$w.on("scroll.unveil resize.unveil touchmove.unveil", unveilThrottled);
-		$w.on("resize.unveil", unveilResize);
+		window.addEventListener('scroll', unveilThrottled, {
+			passive: true,
+		});
+		window.addEventListener('touchmove', unveilThrottled, {
+			passive: true,
+		});
+		window.addEventListener('resize', unveilResize, {
+			passive: true,
+		});
+
+		//$w.on("scroll.unveil touchmove.unveil", unveilThrottled);
+		//$w.on("resize.unveil", unveilResize);
 		$w.on("lookup.unveil", unveil);
 		$w.on("add.unveil", add);
 
